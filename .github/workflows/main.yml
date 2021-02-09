@@ -6,7 +6,13 @@ name: CI
 # Controls when the action will run. Triggers the workflow on push or pull request
 # events but only for the master branch
 on:
+  workflow_dispatch:
   push:
+    branches:
+      - '**'
+  pull_request:
+    branches:
+      - '**'
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -26,7 +32,11 @@ jobs:
         files: /
         recursive: true
         dest: veracode-pipeline-scan-results-to-sarif.zip
-    
+        
+    - uses: actions/upload-artifact@v1
+      with:
+        name: my-artifact
+        path: veracode-pipeline-scan-results-to-sarif.zip    
     # download the Veracode Static Analysis Pipeline scan jar
     - uses: wei/curl@master
       with:
@@ -40,16 +50,10 @@ jobs:
       continue-on-error: true
     - name: Convert pipeline scan output to SARIF format 
       id: convert
-      uses: Veracode/veracode-pipeline-scan-results-to-sarif@v0.1.2
+      uses: ./
       with:
         pipeline-results-json: results.json
-        output-results-sarif: veracode-results.sarif
-        source-base-path-1: "^com/veracode:src/main/java/com/veracode"
-        source-base-path-2: "^WEB-INF:src/main/webapp/WEB-INF"
-        finding-rule-level: "3:1:0"
-    - name: upload sarif file to repository
-      uses: github/codeql-action/upload-sarif@v1
-      with: # Path to SARIF file relative to the root of the repository
-          sarif_file: veracode-results.sarif  
-
-
+    - uses: github/codeql-action/upload-sarif@v1
+      with:
+        # Path to SARIF file relative to the root of the repository
+        sarif_file: veracode-results.sarif 
