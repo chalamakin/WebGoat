@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: build
-        run: maven clean verify
+        run: mvn --batch-mode --update-snapshots verify
   pipeline-scan:
     runs-on: ubuntu-latest
     steps:
